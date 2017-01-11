@@ -79,35 +79,38 @@ can help identify unnamed constants.
 
 **Bad:**
 ```javascript
-// What the heck is 525600 for?
-for (let i = 0; i < 525600; i++) {
-  runCronJob();
-}
+// What the heck is 86400 for?
+setTimeout(() => {
+  this.blastOff()
+}, 86400);
+
 ```
 
 **Good**:
 ```javascript
 // Declare them as capitalized `const` globals.
-const MINUTES_IN_A_YEAR = 525600;
-for (let i = 0; i < MINUTES_IN_A_YEAR; i++) {
-  runCronJob();
-}
+const SECONDS_IN_A_DAY = 86400;
+
+setTimeout(() => {
+  this.blastOff()
+}, SECONDS_IN_A_DAY);
+
 ```
 **[⬆ back to top](#table-of-contents)**
 
 ### Use explanatory variables
 **Bad:**
 ```javascript
-const cityStateRegex = /^(.+)[,\\s]+(.+?)\s*(\d{5})?$/;
-saveCityState(cityStateRegex.match(cityStateRegex)[1], cityStateRegex.match(cityStateRegex)[2]);
+const address = 'One Infinite Loop, Cupertino 95014';
+const cityStateRegex = /^[^,\\]+[,\\\s]+(.+?)\s*(\d{5})?$/;
+saveCityState(address.match(cityStateRegex)[1], address.match(cityStateRegex)[2]);
 ```
 
 **Good**:
 ```javascript
-const cityStateRegex = /^(.+)[,\\s]+(.+?)\s*(\d{5})?$/;
-const match = cityStateRegex.match(cityStateRegex)
-const city = match[1];
-const state = match[2];
+const address = 'One Infinite Loop, Cupertino 95014';
+const cityStateRegex = /^[^,\\]+[,\\\s]+(.+?)\s*(\d{5})?$/;
+const [, city, state] = address.match(cityStateRegex);
 saveCityState(city, state);
 ```
 **[⬆ back to top](#table-of-contents)**
@@ -174,25 +177,23 @@ function paintCar(car) {
 ```
 **[⬆ back to top](#table-of-contents)**
 
-### Short-circuiting is cleaner than conditionals
+### Use default arguments instead of short circuiting or conditionals
 
 **Bad:**
 ```javascript
 function createMicrobrewery(name) {
-  let breweryName;
-  if (name) {
-    breweryName = name;
-  } else {
-    breweryName = 'Hipster Brew Co.';
-  }
+  const breweryName = name || 'Hipster Brew Co.';
+  ...
 }
+
 ```
 
 **Good**:
 ```javascript
-function createMicrobrewery(name) {
-  const breweryName = name || 'Hipster Brew Co.'
+function createMicrobrewery(breweryName = 'Hipster Brew Co.') {
+  ...
 }
+
 ```
 **[⬆ back to top](#table-of-contents)**
 
@@ -227,7 +228,7 @@ const menuConfig = {
   body: 'Bar',
   buttonText: 'Baz',
   cancellable: true
-}
+};
 
 function createMenu(config) {
   // ...
@@ -292,7 +293,7 @@ function addMonthToDate(month, date) {
 }
 
 const date = new Date();
-addMonthToDate(date, 1);
+addMonthToDate(1, date);
 ```
 **[⬆ back to top](#table-of-contents)**
 
@@ -313,7 +314,7 @@ function parseBetterJSAlternative(code) {
   REGEXES.forEach((REGEX) => {
     statements.forEach((statement) => {
       // ...
-    })
+    });
   });
 
   const ast = [];
@@ -323,7 +324,7 @@ function parseBetterJSAlternative(code) {
 
   ast.forEach((node) => {
     // parse...
-  })
+  });
 }
 ```
 
@@ -339,7 +340,7 @@ function tokenize(code) {
   REGEXES.forEach((REGEX) => {
     statements.forEach((statement) => {
       tokens.push( /* ... */ );
-    })
+    });
   });
 
   return tokens;
@@ -359,7 +360,7 @@ function parseBetterJSAlternative(code) {
   const ast = lexer(tokens);
   ast.forEach((node) => {
     // parse...
-  })
+  });
 }
 ```
 **[⬆ back to top](#table-of-contents)**
@@ -431,25 +432,6 @@ function showList(employees) {
 ```
 **[⬆ back to top](#table-of-contents)**
 
-### Use default arguments instead of short circuiting
-**Bad:**
-```javascript
-function writeForumComment(subject, body) {
-  subject = subject || 'No Subject';
-  body = body || 'No text';
-}
-
-```
-
-**Good**:
-```javascript
-function writeForumComment(subject = 'No subject', body = 'No text') {
-  // ...
-}
-
-```
-**[⬆ back to top](#table-of-contents)**
-
 ### Set default objects with Object.assign
 
 **Bad:**
@@ -459,12 +441,12 @@ const menuConfig = {
   body: 'Bar',
   buttonText: null,
   cancellable: true
-}
+};
 
 function createMenu(config) {
-  config.title = config.title || 'Foo'
-  config.body = config.body || 'Bar'
-  config.buttonText = config.buttonText || 'Baz'
+  config.title = config.title || 'Foo';
+  config.body = config.body || 'Bar';
+  config.buttonText = config.buttonText || 'Baz';
   config.cancellable = config.cancellable === undefined ? config.cancellable : true;
 
 }
@@ -479,7 +461,7 @@ const menuConfig = {
   // User did not include 'body' key
   buttonText: 'Send',
   cancellable: true
-}
+};
 
 function createMenu(config) {
   config = Object.assign({
@@ -561,7 +543,7 @@ function splitIntoFirstAndLastName(name) {
   return name.split(' ');
 }
 
-const name = 'Ryan McDermott'
+const name = 'Ryan McDermott';
 const newName = splitIntoFirstAndLastName(name);
 
 console.log(name); // 'Ryan McDermott';
@@ -597,7 +579,7 @@ Array.prototype.diff = function diff(comparisonArray) {
   }
 
   return values;
-}
+};
 ```
 
 **Good:**
@@ -903,13 +885,13 @@ using getters and setters to access data on objects is far better than simply
 looking for a property on an object. "Why?" you might ask. Well, here's an
 unorganized list of reasons why:
 
-1. When you want to do more beyond getting an object property, you don't have
+* When you want to do more beyond getting an object property, you don't have
 to look up and change every accessor in your codebase.
-2. Makes adding validation simple when doing a `set`.
-3. Encapsulates the internal representation.
-4. Easy to add logging and error handling when getting and setting.
-5. Inheriting this class, you can override default functionality.
-6. You can lazy load your object's properties, let's say getting it from a
+* Makes adding validation simple when doing a `set`.
+* Encapsulates the internal representation.
+* Easy to add logging and error handling when getting and setting.
+* Inheriting this class, you can override default functionality.
+* You can lazy load your object's properties, let's say getting it from a
 server.
 
 
@@ -940,11 +922,11 @@ class BankAccount {
       this._balance = amount;
     }
   }
-  
+
   get balance() {
     return this._balance;
   }
-  
+
   verifyIfAmountCanBeSetted(val) {
     // ...
   }
@@ -970,11 +952,11 @@ This can be accomplished through closures (for ES5 and below).
 
 const Employee = function(name) {
   this.name = name;
-}
+};
 
 Employee.prototype.getName = function getName() {
   return this.name;
-}
+};
 
 const employee = new Employee('John Doe');
 console.log(`Employee name: ${employee.getName()}`); // Employee name: John Doe
@@ -1044,7 +1026,7 @@ class UserAuth {
 class UserSettings {
   constructor(user) {
     this.user = user;
-    this.auth = new UserAuth(user)
+    this.auth = new UserAuth(user);
   }
 
   changeSettings(settings) {
@@ -1163,7 +1145,7 @@ function renderLargeRectangles(rectangles) {
     rectangle.setHeight(5);
     const area = rectangle.getArea(); // BAD: Will return 25 for Square. Should be 20.
     rectangle.render(area);
-  })
+  });
 }
 
 const rectangles = [new Rectangle(), new Rectangle(), new Square()];
@@ -1232,7 +1214,7 @@ function renderLargeShapes(shapes) {
 
     const area = shape.getArea();
     shape.render(area);
-  })
+  });
 }
 
 const shapes = [new Rectangle(), new Rectangle(), new Square()];
@@ -1523,7 +1505,7 @@ class Car {
 const car = new Car();
 car.setColor('pink');
 car.setMake('Ford');
-car.setModel('F-150')
+car.setModel('F-150');
 car.save();
 ```
 
@@ -1721,9 +1703,9 @@ require('request').get('https://en.wikipedia.org/wiki/Robert_Cecil_Martin', (req
       } else {
         console.log('File written');
       }
-    })
+    });
   }
-})
+});
 
 ```
 
@@ -1738,7 +1720,7 @@ require('request-promise').get('https://en.wikipedia.org/wiki/Robert_Cecil_Marti
   })
   .catch((err) => {
     console.error(err);
-  })
+  });
 
 ```
 **[⬆ back to top](#table-of-contents)**
@@ -1761,7 +1743,7 @@ require('request-promise').get('https://en.wikipedia.org/wiki/Robert_Cecil_Marti
   })
   .catch((err) => {
     console.error(err);
-  })
+  });
 
 ```
 
@@ -1769,7 +1751,7 @@ require('request-promise').get('https://en.wikipedia.org/wiki/Robert_Cecil_Marti
 ```javascript
 async function getCleanCodeArticle() {
   try {
-    const request = await require('request-promise')
+    const request = await require('request-promise');
     const response = await request.get('https://en.wikipedia.org/wiki/Robert_Cecil_Martin');
     const fileHandle = await require('fs-promise');
 
@@ -2093,7 +2075,7 @@ $scope.model = {
 ////////////////////////////////////////////////////////////////////////////////
 const actions = function() {
   // ...
-}
+};
 ```
 
 **Good**:
@@ -2105,6 +2087,6 @@ $scope.model = {
 
 const actions = function() {
   // ...
-}
+};
 ```
 **[⬆ back to top](#table-of-contents)**
